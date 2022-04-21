@@ -1,0 +1,38 @@
+#!/bin/bash
+# vim: set noet:
+
+libsrcs='glut.cpp glimpl.cpp'
+testsrcs='gl2.cpp gl3.cpp'
+out='Makefile'
+
+testnames=${testsrcs//.cpp/}
+testobjs=${testsrcs//.cpp/.o}
+
+echo "TESTS=$testsrcs" > $out
+echo "LIBSRCS=$libsrcs" >> $out
+echo '' >> $out
+
+echo 'all: buildall' >> $out
+
+all_deps=
+
+for t in $testnames
+do
+	echo "$t.bin: $t.cpp \$(LIBSRCS)" >> $out
+	echo "	g++ -g -o\$@ -std=c++11 $^ -lX11" >> $out
+	echo '' >> $out
+	echo "$t.ref: $t.cpp" >> $out
+	echo "	g++ -g -o\$@ -std=c++11 $^ -lGL -lglut" >> $out
+	echo '' >> $out
+
+	all_deps="$all_deps $t.bin $t.ref"
+done
+
+echo '%.o:%.c'
+echo "	g++ -g -std=c++11 $^"
+
+echo "buildall:$all_deps" >> $out
+echo "" >> $out
+
+echo 'test: test.cpp' >> $out
+echo "	g++ -g -o\@ -std=c++11 $^ -lX11 -lgtest" >> $out
